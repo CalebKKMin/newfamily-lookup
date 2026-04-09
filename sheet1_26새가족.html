@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>26년 새가족 명단</title>
+<title>'26년 새가족</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; background: #f0f4f8; color: #2d3748; }
@@ -178,7 +178,7 @@
 
 <header>
   <div>
-    <h1>26년 새가족 명단</h1>
+    <h1>'26년 새가족</h1>
     <p>53청년부 새가족 관리 시스템</p>
   </div>
   <div class="header-badge">53청년부</div>
@@ -369,9 +369,10 @@ function applyFilters() {
     if (name && !d.name.toLowerCase().includes(name)) return false;
     if (age && d.age.trim() !== age) return false;
     if (group && d.group !== group) return false;
-    if (weekFilter.has(1) && d.week1 !== 'O') return false;
-    if (weekFilter.has(2) && d.week2 !== 'O') return false;
-    if (weekFilter.has(3) && d.week3 !== 'O') return false;
+    if (weekFilter.size > 0) {
+      const done = [d.week1, d.week2, d.week3].filter(w => w === 'O').length;
+      if (!weekFilter.has(done)) return false;
+    }
     return true;
   });
 
