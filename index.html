@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>53청년부 새가족 시스템</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+    background: #f0f4f8; color: #2d3748;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 24px;
+  }
+  .logo { font-size: 2rem; margin-bottom: 8px; }
+  h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
+  p { font-size: 0.9rem; color: #718096; margin-bottom: 40px; }
+  .cards { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+  .card {
+    background: white; border-radius: 16px;
+    padding: 32px 36px; width: 260px; text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    text-decoration: none; color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.14); }
+  .card-icon {
+    width: 60px; height: 60px; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+  }
+  .card-1 .card-icon { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
+  .card-2 .card-icon { background: linear-gradient(135deg, #0891b2, #0e7490); }
+  .card-title { font-size: 1.05rem; font-weight: 700; }
+  .card-desc { font-size: 0.82rem; color: #718096; line-height: 1.5; }
+  .card-badge {
+    padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+  }
+  .card-1 .card-badge { background: #ede9fe; color: #5b21b6; }
+  .card-2 .card-badge { background: #e0f2fe; color: #0369a1; }
+  footer { margin-top: 48px; font-size: 0.78rem; color: #a0aec0; }
+</style>
+</head>
+<body>
+  <div class="logo">⛪</div>
+  <h1>53청년부 새가족 조회 시스템</h1>
+  <p>조회할 명단을 선택해주세요</p>
+
+  <div class="cards">
+    <a href="sheet1_26새가족.html" class="card card-1">
+      <div class="card-icon">🙋</div>
+      <div class="card-title">26년 새가족 명단</div>
+      <div class="card-desc">올해 새가족 과정 수강 현황<br>순배정 및 개인 내용 조회</div>
+      <span class="card-badge">카드 · 목록 뷰</span>
+    </a>
+    <a href="sheet2_교회등록새가족.html" class="card card-2">
+      <div class="card-icon">📋</div>
+      <div class="card-title">25~26년 교회등록 새가족</div>
+      <div class="card-desc">교회 주보 등록일 기준<br>25년~26년 새가족 전체 명단</div>
+      <span class="card-badge">목록 · 주보별 뷰</span>
+    </a>
+  </div>
+
+  <footer>53청년부 · 새가족부</footer>
+</body>
+</html>

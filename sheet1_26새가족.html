@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>26년 새가족 명단</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; background: #f0f4f8; color: #2d3748; }
+
+  header {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white; padding: 24px 32px;
+    box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+  header p { font-size: 0.9rem; opacity: 0.85; }
+  .header-badge {
+    background: rgba(255,255,255,0.2); border-radius: 20px;
+    padding: 6px 16px; font-size: 0.85rem; font-weight: 600;
+  }
+
+  .filter-bar {
+    background: white; padding: 20px 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  }
+  .filter-bar input, .filter-bar select {
+    padding: 8px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+    font-size: 0.9rem; font-family: inherit; outline: none;
+    transition: border-color 0.2s;
+  }
+  .filter-bar input:focus, .filter-bar select:focus { border-color: #4f46e5; }
+  .filter-bar input[type="text"] { width: 160px; }
+  .filter-bar label { font-size: 0.85rem; color: #718096; font-weight: 600; }
+
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+
+  .week-filter { display: flex; gap: 6px; }
+  .week-btn {
+    padding: 6px 14px; border: 1.5px solid #e2e8f0; border-radius: 20px;
+    background: white; cursor: pointer; font-size: 0.82rem; font-family: inherit;
+    transition: all 0.2s; color: #4a5568;
+  }
+  .week-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; }
+
+  .view-toggle { display: flex; gap: 4px; margin-left: auto; }
+  .view-btn {
+    padding: 7px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+    cursor: pointer; font-size: 0.82rem; font-family: inherit;
+    background: white; color: #718096; transition: all 0.2s;
+  }
+  .view-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; }
+
+  .stats-bar {
+    padding: 10px 32px; font-size: 0.85rem; color: #718096;
+    display: flex; gap: 20px; background: #f7fafc; border-bottom: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+  }
+  .stats-bar strong { color: #4f46e5; }
+
+  .reset-btn {
+    padding: 8px 16px; background: #f7fafc; border: 1.5px solid #e2e8f0;
+    border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-family: inherit;
+    color: #718096; transition: all 0.2s;
+  }
+  .reset-btn:hover { background: #e2e8f0; }
+
+  /* ── 카드 뷰 ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px; padding: 24px 32px;
+  }
+
+  .card {
+    background: white; border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+
+  .card-header {
+    padding: 16px 20px 12px;
+    display: flex; align-items: center; gap: 14px;
+    border-bottom: 1px solid #f0f4f8;
+  }
+  .avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.2rem; font-weight: 700; flex-shrink: 0;
+    overflow: hidden; background: #e2e8f0;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .card-title { flex: 1; }
+  .card-name { font-size: 1.05rem; font-weight: 700; color: #2d3748; }
+  .card-age { font-size: 0.82rem; color: #718096; margin-top: 2px; }
+
+  .card-body { padding: 14px 20px; }
+
+  .badge-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .badge {
+    padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+  }
+  .badge-group { background: #ede9fe; color: #5b21b6; }
+  .badge-unassigned { background: #fef3c7; color: #92400e; }
+
+  .label { font-size: 0.75rem; color: #a0aec0; font-weight: 600; margin-bottom: 2px; }
+  .note-text {
+    font-size: 0.83rem; color: #4a5568; background: #f7fafc;
+    border-left: 3px solid #c4b5fd; padding: 8px 12px; border-radius: 0 6px 6px 0;
+    line-height: 1.55;
+  }
+
+  .week-status {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 10px;
+  }
+  .week-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 700;
+  }
+  .week-dot.done { background: #4f46e5; color: white; }
+  .week-dot.not { background: #e2e8f0; color: #a0aec0; }
+
+  /* ── 리스트 뷰 ── */
+  .list-container { padding: 24px 32px; }
+  table { width: 100%; border-collapse: collapse; background: white;
+    border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  thead { background: #4f46e5; color: white; }
+  th { padding: 13px 16px; text-align: left; font-size: 0.85rem; font-weight: 600; }
+  td { padding: 11px 16px; font-size: 0.88rem; border-bottom: 1px solid #f0f4f8; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f5f3ff; }
+
+  .tbl-num { color: #a0aec0; font-size: 0.8rem; width: 32px; text-align: center; }
+  .tbl-name { font-weight: 700; color: #2d3748; }
+  .tbl-mini-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: white; font-size: 0.8rem; font-weight: 700; margin-right: 8px;
+    vertical-align: middle; overflow: hidden; flex-shrink: 0;
+  }
+  .tbl-mini-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .tbl-age { color: #718096; font-size: 0.84rem; }
+  .tbl-week {
+    display: inline-flex; gap: 4px;
+  }
+  .tbl-dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.66rem; font-weight: 700;
+  }
+  .tbl-dot.done { background: #4f46e5; color: white; }
+  .tbl-dot.not { background: #e2e8f0; color: #a0aec0; }
+  .tbl-group-badge {
+    padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+    white-space: nowrap;
+  }
+  .tbl-note { font-size: 0.8rem; color: #4a5568; max-width: 280px; line-height: 1.4; }
+
+  .no-result {
+    text-align: center; padding: 60px 20px; color: #a0aec0;
+    font-size: 1rem; grid-column: 1/-1;
+  }
+  .no-result-tr td { text-align: center; padding: 50px; color: #a0aec0; }
+
+  @media (max-width: 600px) {
+    .grid, .list-container { padding: 16px; }
+    .filter-bar { padding: 16px; }
+    header { padding: 16px 20px; flex-direction: column; align-items: flex-start; gap: 8px; }
+    .view-toggle { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>26년 새가족 명단</h1>
+    <p>53청년부 새가족 관리 시스템</p>
+  </div>
+  <div class="header-badge">53청년부</div>
+</header>
+
+<div class="filter-bar">
+  <div class="filter-group">
+    <label>이름 검색</label>
+    <input type="text" id="searchName" placeholder="이름 입력..." oninput="applyFilters()">
+  </div>
+  <div class="filter-group">
+    <label>또래</label>
+    <select id="filterAge" onchange="applyFilters()">
+      <option value="">전체</option>
+      <option value="94">94년</option>
+      <option value="95">95년</option>
+      <option value="96">96년</option>
+      <option value="97">97년</option>
+      <option value="98">98년</option>
+      <option value="99">99년</option>
+      <option value="00">00년</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>순배정</label>
+    <select id="filterGroup" onchange="applyFilters()">
+      <option value="">전체</option>
+      <option value="미배정">미배정</option>
+      <option value="1순 김민제">1순 김민제</option>
+      <option value="2순 김가연">2순 김가연</option>
+      <option value="3순 남궁찬">3순 남궁찬</option>
+      <option value="4순 이종원">4순 이종원</option>
+      <option value="5순 조명욱">5순 조명욱</option>
+      <option value="6순 류현우">6순 류현우</option>
+      <option value="7순 김현아">7순 김현아</option>
+      <option value="8순 천은휘">8순 천은휘</option>
+      <option value="9순 변재성">9순 변재성</option>
+      <option value="10순 정지환">10순 정지환</option>
+      <option value="11순 이예나">11순 이예나</option>
+      <option value="12순 허준행">12순 허준행</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>새가족 과정</label>
+    <div class="week-filter">
+      <button class="week-btn" id="btn1" onclick="toggleWeek(1)">1주</button>
+      <button class="week-btn" id="btn2" onclick="toggleWeek(2)">2주</button>
+      <button class="week-btn" id="btn3" onclick="toggleWeek(3)">3주</button>
+    </div>
+  </div>
+  <button class="reset-btn" onclick="resetFilters()">초기화</button>
+  <div class="view-toggle">
+    <button class="view-btn" id="btnList" onclick="setView('list')">목록</button>
+    <button class="view-btn active" id="btnCard" onclick="setView('card')">카드</button>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <span>전체: <strong id="totalCount">0</strong>명</span>
+  <span>조회: <strong id="filteredCount">0</strong>명</span>
+  <span>3주 완료: <strong id="completeCount">0</strong>명</span>
+  <span>미배정: <strong id="unassignedCount">0</strong>명</span>
+</div>
+
+<div class="grid" id="cardGrid"></div>
+
+<div class="list-container" id="listView" style="display:none;">
+  <table>
+    <thead>
+      <tr>
+        <th class="tbl-num">#</th>
+        <th>이름</th>
+        <th>또래</th>
+        <th>새가족 과정</th>
+        <th>순배정</th>
+        <th>내용</th>
+      </tr>
+    </thead>
+    <tbody id="listBody"></tbody>
+  </table>
+</div>
+
+<script>
+const PHOTOS = {
+  "김운학": "photos/s1_r2.jpeg",
+  "오전진": "photos/s1_r3.jpeg",
+  "최현준": "photos/s1_r4.png",
+  "방효석": "photos/s1_r5.png",
+  "전영현": "photos/s1_r6.png",
+  "김미조": "photos/s1_r7.png",
+  "나현서": "photos/s1_r8.png",
+  "이순욱": "photos/s1_r9.png",
+  "이현수": "photos/s1_r10.png",
+  "조정윤": "photos/s1_r11.png",
+  "양현모": "photos/s1_r12.png",
+  "정예인": "photos/s1_r13.png",
+  "이명준": "photos/s1_r14.png",
+  "김요한": "photos/s1_r15.png",
+  "인장호": "photos/s1_r16.png",
+  "윤빈":   "photos/s1_r17.png",
+  "김상혁": "photos/s1_r18.png",
+  "방서준": "photos/s1_r19.png",
+  "문훈":   "photos/s1_r20.png",
+  "이혜솔": "photos/s1_r21.png",
+  "이예지": "photos/s1_r22.png",
+  "성치현": "photos/s1_r23.png",
+  "이유진": "photos/s1_r24.png",
+  "윤현주": "photos/s1_r25.png"
+};
+
+const DATA = [
+  {name:"김운학",age:"96",week1:"O",week2:"O",week3:"O",group:"7순 김현아",note:""},
+  {name:"오전진",age:"99",week1:"O",week2:"",week3:"",group:"미배정",note:""},
+  {name:"최현준",age:"95",week1:"O",week2:"O",week3:"O",group:"5순 조명욱",note:"010-2548-4358<br>새가족 3주 끝"},
+  {name:"방효석",age:"00",week1:"O",week2:"O",week3:"O",group:"4순 이종원",note:"어학원 인사팀, 모태신앙"},
+  {name:"전영현",age:"98",week1:"O",week2:"O",week3:"O",group:"4순 이종원",note:"직장인 / 인사팀 /<br>인천 본가에서 독립 노원구 자취 /<br>모교회 섬기다 올해 광염교회로"},
+  {name:"김미조",age:"98",week1:"O",week2:"",week3:"",group:"미배정",note:"치위생사 /<br>교회 방학 후 다시 다니려고..."},
+  {name:"나현서",age:"00",week1:"O",week2:"",week3:"",group:"미배정",note:"장교로 군 생활"},
+  {name:"이순욱",age:"94",week1:"O",week2:"",week3:"",group:"미배정",note:"우체국 근무"},
+  {name:"이현수",age:"00",week1:"O",week2:"O",week3:"O",group:"4순 이종원",note:"2월에 졸업 / 공부 중<br>교회 등록 (2025.12.31)<br>이전 교회 (청년회장 / 부모님 장로/권사님)<br>3주차 완료"},
+  {name:"조정윤",age:"96",week1:"O",week2:"O",week3:"",group:"미배정",note:"교회 새가족부 조안나 집사님 소개로<br>2주차 완료 / 교회 등록 완료"},
+  {name:"양현모",age:"96",week1:"O",week2:"",week3:"",group:"미배정",note:"포천에서 16년 한교회 섬김<br>이예인과 8월 결혼 예정 / 신혼집은 구리<br>교회 등록"},
+  {name:"정예인",age:"00",week1:"O",week2:"",week3:"",group:"미배정",note:"스타일리스트<br>`23년 8월 27일<br>교회 등록 / 54청년부 활동 안함<br>53은 직장인 중심이라 오고 싶었다고 ^^"},
+  {name:"이명준",age:"99",week1:"O",week2:"O",week3:"O",group:"미배정",note:"3주차 완료"},
+  {name:"김요한",age:"97",week1:"O",week2:"O",week3:"O",group:"11순 이예나",note:"3주차 완료<br>김여주 동생"},
+  {name:"인장호",age:"96",week1:"O",week2:"O",week3:"O",group:"2순 김가연",note:"황정하, 박우상 초등부터 친구<br>본가는 노원구, 현 거주지는 경기 의왕 (직장)<br>3주차 완료 (교회 등록)"},
+  {name:"윤빈",age:"95",week1:"O",week2:"O",week3:"O",group:"4순 이종원",note:"모태신앙 / 화학과 대학원 졸업하고<br>뇌종양 연구 3년 하다가 일 쉰지 3개월 됨<br>3주차 완료"},
+  {name:"김상혁",age:"95",week1:"O",week2:"O",week3:"O",group:"4순 이종원",note:"모태신앙 / 장애인발달복지관 근무중<br>노원에서 자취 / 군대 이후 7~8년간 교회 떠났다 찾아옴<br>교회등록 완료 / 3주차 완료"},
+  {name:"방서준",age:"94",week1:"O",week2:"O",week3:"O",group:"미배정",note:"미국 태생, 미 대학 졸 / 개발자<br>13세에 귀국 / 안예림 친구 / 카톨릭 집안 (작은 아버님이 신부)<br>3주차 완료 / 교회등록 완료"},
+  {name:"문훈",age:"00",week1:"O",week2:"O",week3:"O",group:"미배정",note:"2016년 집이 노원으로 이사 후에도 성수동 교회 섬기다<br>몸이 불편하여 교회 옮김, KT (사내 세차)<br>3주차 완료 / 교회 등록 완료"},
+  {name:"이혜솔",age:"94",week1:"O",week2:"O",week3:"O",group:"미배정",note:"UIUX 디자이너 / 모태신앙<br>한동안 떠나 있었음 / 청년부가 그리워..<br>박하영 친구<br>3주차 완료 / 교회등록 완료"},
+  {name:"이예지",age:"95",week1:"O",week2:"O",week3:"",group:"미배정",note:"심리학 대학원 졸업, 현재 고대병원 심리쪽 연구중<br>고혁신목사님과 같은 교회 섬김<br>2주차 완료 / 교회등록 완료"},
+  {name:"성치현",age:"96",week1:"O",week2:"O",week3:"",group:"미배정",note:"미국 팬실베니아 살다가 한국와서<br>재즈아카데미를 다니고 베이스 연주<br>예전엔 바텐더 일했고 지금은 그만두고 교회로…<br>이길영 장로님과 아버님이 군 카투사 동기<br>2018년 3월 25일 54 등록 / 사정상 못나오고 주일 예배 간간히 드림<br>2주차 완료 / 교회등록 성도"},
+  {name:"이유진",age:"97",week1:"O",week2:"",week3:"",group:"미배정",note:"우리교회 오래 다님<br>작년에 못나오고 올해 다시 나옴<br>EST Soft 인턴, 서초에서 자취<br>본가는 중랑구 / 旣 등록 교인 / 1주차 완료"},
+  {name:"윤현주",age:"97",week1:"O",week2:"",week3:"",group:"미배정",note:"주일에 가족과 다른 교회 출석<br>청년부 예배를 사모해서 찾아옴<br>먹골 부근 거주, KBS 근무<br>방효석 중학교 친구 누나 / 1주차 완료"}
+];
+
+let weekFilter = new Set();
+let currentView = 'card';
+
+const avatarColors = [
+  '#4f46e5, #7c3aed','#0891b2, #0e7490','#059669, #047857',
+  '#d97706, #b45309','#dc2626, #b91c1c','#7c3aed, #6d28d9',
+  '#0284c7, #0369a1','#16a34a, #15803d','#ea580c, #c2410c'
+];
+const avatarSolid = [
+  '#4f46e5','#0891b2','#059669','#d97706','#dc2626',
+  '#7c3aed','#0284c7','#16a34a','#ea580c'
+];
+function getAvatarColor(i) { return avatarColors[i % avatarColors.length]; }
+function getAvatarSolid(i) { return avatarSolid[i % avatarSolid.length]; }
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('cardGrid').style.display = v === 'card' ? 'grid' : 'none';
+  document.getElementById('listView').style.display = v === 'list' ? 'block' : 'none';
+  document.getElementById('btnCard').classList.toggle('active', v === 'card');
+  document.getElementById('btnList').classList.toggle('active', v === 'list');
+  applyFilters();
+}
+
+function toggleWeek(w) {
+  if (weekFilter.has(w)) {
+    weekFilter.delete(w);
+    document.getElementById('btn'+w).classList.remove('active');
+  } else {
+    weekFilter.add(w);
+    document.getElementById('btn'+w).classList.add('active');
+  }
+  applyFilters();
+}
+
+function resetFilters() {
+  document.getElementById('searchName').value = '';
+  document.getElementById('filterAge').value = '';
+  document.getElementById('filterGroup').value = '';
+  weekFilter.clear();
+  [1,2,3].forEach(w => document.getElementById('btn'+w).classList.remove('active'));
+  applyFilters();
+}
+
+function applyFilters() {
+  const name = document.getElementById('searchName').value.trim().toLowerCase();
+  const age = document.getElementById('filterAge').value;
+  const group = document.getElementById('filterGroup').value;
+
+  const filtered = DATA.filter(d => {
+    if (name && !d.name.toLowerCase().includes(name)) return false;
+    if (age && d.age.trim() !== age) return false;
+    if (group && d.group !== group) return false;
+    if (weekFilter.has(1) && d.week1 !== 'O') return false;
+    if (weekFilter.has(2) && d.week2 !== 'O') return false;
+    if (weekFilter.has(3) && d.week3 !== 'O') return false;
+    return true;
+  });
+
+  if (currentView === 'card') renderCards(filtered);
+  else renderList(filtered);
+
+  document.getElementById('filteredCount').textContent = filtered.length;
+  document.getElementById('totalCount').textContent = DATA.length;
+  document.getElementById('completeCount').textContent = DATA.filter(d => d.week1==='O' && d.week2==='O' && d.week3==='O').length;
+  document.getElementById('unassignedCount').textContent = DATA.filter(d => d.group==='미배정').length;
+}
+
+function weekDotsHtml(d, dotClass) {
+  return [
+    {label:'1주', done: d.week1==='O'},
+    {label:'2주', done: d.week2==='O'},
+    {label:'3주', done: d.week3==='O'}
+  ].map(w => `<span class="${dotClass} ${w.done ? 'done' : 'not'}">${w.label}</span>`).join('');
+}
+
+function groupBadgeHtml(group) {
+  const isAssigned = group !== '미배정';
+  return `<span class="tbl-group-badge ${isAssigned ? 'badge-group' : 'badge-unassigned'}">${group}</span>`;
+}
+
+function avatarHtml(name, idx, size='48px', fontSize='1.2rem') {
+  const photo = PHOTOS[name.trim()];
+  if (photo) {
+    return `<div class="avatar" style="width:${size};height:${size};"><img src="${photo}" alt="${name}" onerror="this.parentElement.innerHTML='<span style=font-size:${fontSize};font-weight:700>${name.trim().charAt(0)}</span>';this.parentElement.style.background=getAvatarSolid(${idx})"></div>`;
+  }
+  return `<div class="avatar" style="width:${size};height:${size};background:linear-gradient(135deg,${getAvatarColor(idx)});font-size:${fontSize}">${name.trim().charAt(0)}</div>`;
+}
+
+function miniAvatarHtml(name, idx) {
+  const photo = PHOTOS[name.trim()];
+  if (photo) {
+    return `<span class="tbl-mini-avatar"><img src="${photo}" alt="${name}" onerror="this.parentElement.textContent='${name.trim().charAt(0)}';this.parentElement.style.background=getAvatarSolid(${idx})"></span>`;
+  }
+  return `<span class="tbl-mini-avatar" style="background:${getAvatarSolid(idx)}">${name.trim().charAt(0)}</span>`;
+}
+
+/* ── 카드 렌더 ── */
+function renderCards(list) {
+  const grid = document.getElementById('cardGrid');
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="no-result">조건에 맞는 명단이 없습니다.</div>';
+    return;
+  }
+  grid.innerHTML = list.map((d, i) => {
+    const weekDone = [d.week1==='O', d.week2==='O', d.week3==='O'];
+    const totalWeeks = weekDone.filter(Boolean).length;
+    const isAssigned = d.group !== '미배정';
+    const prog = ['#e2e8f0','#fbbf24','#34d399','#4f46e5'][totalWeeks];
+    return `
+    <div class="card">
+      <div class="card-header">
+        ${avatarHtml(d.name, i)}
+        <div class="card-title">
+          <div class="card-name">${d.name.trim()}</div>
+          <div class="card-age">${d.age}년생 또래</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.72rem;color:#a0aec0;margin-bottom:4px;">새가족 과정</div>
+          <div style="font-size:1rem;font-weight:700;color:${prog}">${totalWeeks}주 완료</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="week-status">
+          ${[1,2,3].map((w,idx2) => `<div class="week-dot ${weekDone[idx2] ? 'done' : 'not'}">${w}주</div>`).join('')}
+          <span style="font-size:0.78rem;color:#94a3b8;margin-left:4px;">
+            ${totalWeeks === 3 ? '✓ 과정 완료' : totalWeeks === 0 ? '미시작' : `${totalWeeks}주 진행중`}
+          </span>
+        </div>
+        <div class="label">순배정</div>
+        <div class="badge-row">
+          <span class="badge ${isAssigned ? 'badge-group' : 'badge-unassigned'}">${d.group}</span>
+        </div>
+        ${d.note ? `<div class="label">내용</div><div class="note-text">${d.note}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── 리스트 렌더 ── */
+function renderList(list) {
+  const tbody = document.getElementById('listBody');
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr class="no-result-tr"><td colspan="6">조건에 맞는 명단이 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map((d, i) => {
+    const isAssigned = d.group !== '미배정';
+    const totalWeeks = [d.week1, d.week2, d.week3].filter(w => w === 'O').length;
+    const prog = ['#cbd5e0','#fbbf24','#34d399','#4f46e5'][totalWeeks];
+    return `
+    <tr>
+      <td class="tbl-num">${i+1}</td>
+      <td style="display:flex;align-items:center;">
+        ${miniAvatarHtml(d.name, i)}
+        <span class="tbl-name">${d.name.trim()}</span>
+      </td>
+      <td class="tbl-age">${d.age}년생</td>
+      <td>
+        <div class="tbl-week">
+          ${[{l:'1주',v:d.week1},{l:'2주',v:d.week2},{l:'3주',v:d.week3}].map(w =>
+            `<span class="tbl-dot ${w.v==='O' ? 'done' : 'not'}">${w.l}</span>`
+          ).join('')}
+        </div>
+        <div style="font-size:0.72rem;color:${prog};margin-top:3px;font-weight:600;">
+          ${totalWeeks === 3 ? '완료' : totalWeeks === 0 ? '미시작' : `${totalWeeks}주`}
+        </div>
+      </td>
+      <td><span class="tbl-group-badge ${isAssigned ? 'badge-group' : 'badge-unassigned'}">${d.group}</span></td>
+      <td class="tbl-note">${d.note || '<span style="color:#cbd5e0">-</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+applyFilters();
+</script>
+</body>
+</html>

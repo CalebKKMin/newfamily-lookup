@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>25~26년 교회등록 새가족</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; background: #f0f4f8; color: #2d3748; }
+
+  header {
+    background: linear-gradient(135deg, #0891b2, #0e7490);
+    color: white; padding: 24px 32px;
+    box-shadow: 0 4px 12px rgba(8,145,178,0.3);
+  }
+  header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+  header p { font-size: 0.9rem; opacity: 0.85; }
+
+  .filter-bar {
+    background: white; padding: 20px 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  }
+  .filter-bar input, .filter-bar select {
+    padding: 8px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+    font-size: 0.9rem; font-family: inherit; outline: none;
+    transition: border-color 0.2s;
+  }
+  .filter-bar input:focus, .filter-bar select:focus { border-color: #0891b2; }
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+  label { font-size: 0.85rem; color: #718096; font-weight: 600; }
+
+  .reset-btn {
+    padding: 8px 16px; background: #f7fafc; border: 1.5px solid #e2e8f0;
+    border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-family: inherit;
+    color: #718096; transition: all 0.2s;
+  }
+  .reset-btn:hover { background: #e2e8f0; }
+
+  .view-toggle {
+    display: flex; gap: 4px; margin-left: auto;
+  }
+  .view-btn {
+    padding: 7px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+    cursor: pointer; font-size: 0.82rem; font-family: inherit;
+    background: white; color: #718096; transition: all 0.2s;
+  }
+  .view-btn.active { background: #0891b2; color: white; border-color: #0891b2; }
+
+  .stats-bar {
+    padding: 10px 32px; font-size: 0.85rem; color: #718096;
+    display: flex; gap: 20px; background: #f7fafc; border-bottom: 1px solid #e2e8f0;
+  }
+  .stats-bar strong { color: #0891b2; }
+
+  /* 테이블 뷰 */
+  .table-container { padding: 24px 32px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: white;
+    border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  thead { background: #0891b2; color: white; }
+  th { padding: 14px 16px; text-align: left; font-size: 0.88rem; font-weight: 600; }
+  td { padding: 12px 16px; font-size: 0.88rem; border-bottom: 1px solid #f0f4f8; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f0f9ff; }
+  .row-num { color: #a0aec0; font-size: 0.8rem; width: 36px; }
+  .name-cell { font-weight: 600; color: #2d3748; }
+  .date-cell { color: #4a5568; }
+  .year-badge {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 700;
+  }
+  .year-25 { background: #dbeafe; color: #1d4ed8; }
+  .year-26 { background: #dcfce7; color: #15803d; }
+
+  /* 그룹 뷰 */
+  .group-container { padding: 24px 32px; }
+  .month-group { margin-bottom: 24px; }
+  .month-title {
+    font-size: 1rem; font-weight: 700; color: #0891b2;
+    padding: 10px 16px; background: #e0f2fe; border-radius: 8px;
+    margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .month-title .count {
+    background: #0891b2; color: white; border-radius: 20px;
+    padding: 1px 10px; font-size: 0.78rem;
+  }
+
+  .week-group { margin-bottom: 16px; }
+  .week-title {
+    font-size: 0.88rem; font-weight: 600; color: #64748b;
+    padding: 6px 12px; margin-bottom: 8px;
+    border-left: 3px solid #0891b2;
+  }
+
+  .person-cards {
+    display: flex; flex-wrap: wrap; gap: 10px;
+  }
+  .person-card {
+    background: white; border-radius: 10px;
+    padding: 12px 16px; min-width: 130px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    display: flex; align-items: center; gap: 10px;
+    transition: transform 0.15s;
+  }
+  .person-card:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  .mini-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 0.95rem; font-weight: 700; flex-shrink: 0;
+    background: linear-gradient(135deg, #0891b2, #0e7490);
+    overflow: hidden;
+  }
+  .mini-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .tbl-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: white; font-size: 0.8rem; font-weight: 700;
+    margin-right: 8px; vertical-align: middle; overflow: hidden; flex-shrink: 0;
+  }
+  .tbl-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .person-name { font-size: 0.9rem; font-weight: 600; }
+  .person-date { font-size: 0.74rem; color: #94a3b8; margin-top: 1px; }
+
+  .no-result {
+    text-align: center; padding: 60px 20px; color: #a0aec0; font-size: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    .filter-bar, .table-container, .group-container, .stats-bar { padding: 16px; }
+    header { padding: 16px 20px; }
+    .view-toggle { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>25~26년 교회등록 새가족</h1>
+  <p>교회 주보 등록일 기준 새가족 명단</p>
+</header>
+
+<div class="filter-bar">
+  <div class="filter-group">
+    <label>이름 검색</label>
+    <input type="text" id="searchName" placeholder="이름 입력..." oninput="applyFilters()">
+  </div>
+  <div class="filter-group">
+    <label>연도</label>
+    <select id="filterYear" onchange="applyFilters()">
+      <option value="">전체 (25~26년)</option>
+      <option value="2025">2025년</option>
+      <option value="2026">2026년</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>월</label>
+    <select id="filterMonth" onchange="applyFilters()">
+      <option value="">전체 월</option>
+    </select>
+  </div>
+  <button class="reset-btn" onclick="resetFilters()">초기화</button>
+  <div class="view-toggle">
+    <button class="view-btn active" id="btnTable" onclick="setView('table')">목록</button>
+    <button class="view-btn" id="btnGroup" onclick="setView('group')">주보별</button>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <span>전체: <strong id="totalCount">0</strong>명</span>
+  <span>조회: <strong id="filteredCount">0</strong>명</span>
+  <span>25년: <strong id="count25">0</strong>명</span>
+  <span>26년: <strong id="count26">0</strong>명</span>
+</div>
+
+<div id="tableView" class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th class="row-num">#</th>
+        <th>이름</th>
+        <th>교회 주보 일자</th>
+        <th>연도</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<div id="groupView" class="group-container" style="display:none;"></div>
+
+<script>
+const PHOTOS = {
+  "엔지완악": "photos/s2_r1.png",
+  "송영인":   "photos/s2_r2.png",
+  "박희정":   "photos/s2_r3.png",
+  "김준기":   "photos/s2_r4.png",
+  "박지수":   "photos/s2_r5.png",
+  "조재은":   "photos/s2_r7.png",
+  "이재훈":   "photos/s2_r8.png",
+  "서경덕":   "photos/s2_r9.png",
+  "박진우":   "photos/s2_r10.png",
+  "최채희":   "photos/s2_r11.png",
+  "김정은":   "photos/s2_r12.png",
+  "이경은":   "photos/s2_r13.png",
+  "김영기":   "photos/s2_r15.png",
+  "황정화":   "photos/s2_r16.png",
+  "윤빈":     "photos/s2_r17.png",
+  "김인수":   "photos/s2_r18.png",
+  "권수연":   "photos/s2_r19.png",
+  "이승규":   "photos/s2_r20.png",
+  "황병선":   "photos/s2_r21.png",
+  "유수민":   "photos/s2_r22.png",
+  "정용범":   "photos/s2_r23.png",
+  "최혜원":   "photos/s2_r24.png",
+  "김다혜":   "photos/s2_r25.png",
+  "정지우":   "photos/s2_r26.png",
+  "이상준":   "photos/s2_r31.png",
+  "양선혜":   "photos/s2_r33.png",
+  "김운학":   "photos/s2_r34.png",
+  "이현수":   "photos/s2_r35.png",
+  "방효석":   "photos/s2_r36.png",
+  "유선영":   "photos/s2_r37.png",
+  "유현영":   "photos/s2_r38.png",
+  "이승훈":   "photos/s2_r39.png",
+  "전영현":   "photos/s2_r40.png",
+  "조은서":   "photos/s2_r41.png",
+  "이재영":   "photos/s2_r42.png",
+  "박필환":   "photos/s2_r43.png",
+  "박준용":   "photos/s2_r44.png",
+  "김하경":   "photos/s2_r45.png",
+  "이하은":   "photos/s2_r46.png",
+  "윤제윤":   "photos/s2_r47.png",
+  "이순욱":   "photos/s2_r48.png",
+  "신소담":   "photos/s2_r49.png",
+  "양현모":   "photos/s2_r50.png",
+  "조정윤":   "photos/s2_r51.png",
+  "문훈":     "photos/s2_r52.png",
+  "김상혁":   "photos/s2_r53.png",
+  "김용국":   "photos/s2_r54.png",
+  "김경식":   "photos/s2_r55.png",
+  "인장호":   "photos/s2_r56.png",
+  "박다영":   "photos/s2_r57.png",
+  "이예지":   "photos/s2_r58.png",
+  "이혜솔":   "photos/s2_r59.png",
+  "방서준":   "photos/s2_r60.png",
+  "정현진":   "photos/s2_r61.png",
+  "최현준":   "photos/s2_r62.png",
+  "박혜은":   "photos/s2_r63.png"
+};
+
+// 김지원은 같은 이름이 2명 (row6=20250323, row14=20250524) → row 기반 별도 처리
+const PHOTOS_BY_ROW = {
+  6:  "photos/s2_r6.png",
+  14: "photos/s2_r14.png"
+};
+
+const RAW_DATA = [
+  {name:"엔지완악",date:"20250309"},
+  {name:"송영인",date:"20250316"},
+  {name:"박희정",date:"20250316"},
+  {name:"김준기",date:"20250316"},
+  {name:"박지수",date:"20250316"},
+  {name:"김지원",date:"20250323"},
+  {name:"조재은",date:"20250323"},
+  {name:"이재훈",date:"20250323"},
+  {name:"서경덕",date:"20250406"},
+  {name:"박진우",date:"20250413"},
+  {name:"최채희",date:"20250427"},
+  {name:"김정은",date:"20250518"},
+  {name:"이경은",date:"20250518"},
+  {name:"김지원",date:"20250524"},
+  {name:"김영기",date:"20250524"},
+  {name:"황정화",date:"20250524"},
+  {name:"윤빈",date:"20250524"},
+  {name:"김인수",date:"20250628"},
+  {name:"권수연",date:"20250628"},
+  {name:"이승규",date:"20250706"},
+  {name:"황병선",date:"20250720"},
+  {name:"유수민",date:"20250810"},
+  {name:"정용범",date:"20250817"},
+  {name:"최혜원",date:"20250824"},
+  {name:"김다혜",date:"20250831"},
+  {name:"정지우",date:"20250928"},
+  {name:"조현묵",date:"20251005"},
+  {name:"박지윤",date:"20251102"},
+  {name:"임효진",date:"20251109"},
+  {name:"홍혜원",date:"20251123"},
+  {name:"이상준",date:"20251130"},
+  {name:"원요셉",date:"20251221"},
+  {name:"양선혜",date:"20251228"},
+  {name:"김운학",date:"20251228"},
+  {name:"이현수",date:"20260104"},
+  {name:"방효석",date:"20260104"},
+  {name:"유선영",date:"20260104"},
+  {name:"유현영",date:"20260104"},
+  {name:"이승훈",date:"20260104"},
+  {name:"전영현",date:"20260104"},
+  {name:"조은서",date:"20260104"},
+  {name:"이재영",date:"20260104"},
+  {name:"박필환",date:"20260104"},
+  {name:"박준용",date:"20260111"},
+  {name:"김하경",date:"20260118"},
+  {name:"이하은",date:"20260118"},
+  {name:"윤제윤",date:"20260118"},
+  {name:"이순욱",date:"20260118"},
+  {name:"신소담",date:"20260125"},
+  {name:"양현모",date:"20260201"},
+  {name:"조정윤",date:"20260308"},
+  {name:"문훈",date:"20260315"},
+  {name:"김상혁",date:"20260315"},
+  {name:"김용국",date:"20260322"},
+  {name:"김경식",date:"20260329"},
+  {name:"인장호",date:"20260329"},
+  {name:"박다영",date:"20260405"},
+  {name:"이예지",date:"20260405"},
+  {name:"이혜솔",date:"20260405"},
+  {name:"방서준",date:"20260405"},
+  {name:"정현진",date:"20260412"},
+  {name:"최현준",date:"20260412"},
+  {name:"박혜은",date:"20260412"}
+];
+
+// 데이터 전처리
+const DATA = RAW_DATA.map((d, rawIdx) => {
+  const y = d.date.substring(0,4);
+  const m = d.date.substring(4,6);
+  const day = d.date.substring(6,8);
+  // 시트2의 0-indexed row = rawIdx + 1 (헤더 1행)
+  const sheetRow = rawIdx + 1;
+  return {
+    ...d,
+    name: d.name.trim(),
+    year: y,
+    month: m,
+    day: day,
+    displayDate: `${y}.${m}.${day}`,
+    ym: `${y}-${m}`,
+    sheetRow
+  };
+});
+
+// 월 옵션 생성
+const months = [...new Set(DATA.map(d => d.ym))].sort();
+const monthSel = document.getElementById('filterMonth');
+months.forEach(ym => {
+  const [y, m] = ym.split('-');
+  const opt = document.createElement('option');
+  opt.value = ym;
+  opt.textContent = `${y}년 ${parseInt(m)}월`;
+  monthSel.appendChild(opt);
+});
+
+let currentView = 'table';
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('tableView').style.display = v === 'table' ? 'block' : 'none';
+  document.getElementById('groupView').style.display = v === 'group' ? 'block' : 'none';
+  document.getElementById('btnTable').classList.toggle('active', v === 'table');
+  document.getElementById('btnGroup').classList.toggle('active', v === 'group');
+  applyFilters();
+}
+
+function resetFilters() {
+  document.getElementById('searchName').value = '';
+  document.getElementById('filterYear').value = '';
+  document.getElementById('filterMonth').value = '';
+  applyFilters();
+}
+
+function formatDateKor(dateStr) {
+  const y = dateStr.substring(0,4);
+  const m = dateStr.substring(4,6);
+  const d = dateStr.substring(6,8);
+  const date = new Date(`${y}-${m}-${d}`);
+  const days = ['일','월','화','수','목','금','토'];
+  return `${y}년 ${parseInt(m)}월 ${parseInt(d)}일 (${days[date.getDay()]})`;
+}
+
+const avatarColors = [
+  '#0891b2','#0e7490','#0284c7','#0369a1','#7c3aed',
+  '#059669','#d97706','#dc2626','#16a34a'
+];
+
+function getPhotoSrc(d) {
+  // 김지원처럼 동명이인은 row로 구분
+  if (PHOTOS_BY_ROW[d.sheetRow]) return PHOTOS_BY_ROW[d.sheetRow];
+  return PHOTOS[d.name] || null;
+}
+
+function miniAvatarHtml(d, idx) {
+  const src = getPhotoSrc(d);
+  const color = avatarColors[idx % avatarColors.length];
+  if (src) {
+    return `<div class="mini-avatar"><img src="${src}" alt="${d.name}" onerror="this.parentElement.textContent='${d.name.charAt(0)}';this.parentElement.style.background='${color}'"></div>`;
+  }
+  return `<div class="mini-avatar" style="background:${color}">${d.name.charAt(0)}</div>`;
+}
+
+function tblAvatarHtml(d, idx) {
+  const src = getPhotoSrc(d);
+  const color = avatarColors[idx % avatarColors.length];
+  if (src) {
+    return `<span class="tbl-avatar"><img src="${src}" alt="${d.name}" onerror="this.parentElement.textContent='${d.name.charAt(0)}';this.parentElement.style.background='${color}'"></span>`;
+  }
+  return `<span class="tbl-avatar" style="background:${color}">${d.name.charAt(0)}</span>`;
+}
+
+function applyFilters() {
+  const name = document.getElementById('searchName').value.trim().toLowerCase();
+  const year = document.getElementById('filterYear').value;
+  const ym = document.getElementById('filterMonth').value;
+
+  const filtered = DATA.filter(d => {
+    if (name && !d.name.toLowerCase().includes(name)) return false;
+    if (year && d.year !== year) return false;
+    if (ym && d.ym !== ym) return false;
+    return true;
+  });
+
+  document.getElementById('filteredCount').textContent = filtered.length;
+  document.getElementById('totalCount').textContent = DATA.length;
+  document.getElementById('count25').textContent = DATA.filter(d => d.year === '2025').length;
+  document.getElementById('count26').textContent = DATA.filter(d => d.year === '2026').length;
+
+  if (currentView === 'table') renderTable(filtered);
+  else renderGroup(filtered);
+}
+
+function renderTable(list) {
+  const tbody = document.getElementById('tableBody');
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:#a0aec0;">조건에 맞는 명단이 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map((d, i) => `
+    <tr>
+      <td class="row-num">${i+1}</td>
+      <td style="display:flex;align-items:center;">
+        ${tblAvatarHtml(d, i)}
+        <span class="name-cell">${d.name}</span>
+      </td>
+      <td class="date-cell">${formatDateKor(d.date)}</td>
+      <td><span class="year-badge year-${d.year.substring(2)}">${d.year}년</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderGroup(list) {
+  const container = document.getElementById('groupView');
+  if (list.length === 0) {
+    container.innerHTML = '<div class="no-result">조건에 맞는 명단이 없습니다.</div>';
+    return;
+  }
+
+  // 날짜별 그룹화
+  const groups = {};
+  list.forEach(d => {
+    if (!groups[d.date]) groups[d.date] = [];
+    groups[d.date].push(d);
+  });
+
+  // 월별 그룹화
+  const byMonth = {};
+  Object.keys(groups).sort().forEach(date => {
+    const ym = date.substring(0,6);
+    const y = date.substring(0,4);
+    const m = date.substring(4,6);
+    const key = `${y}년 ${parseInt(m)}월`;
+    if (!byMonth[key]) byMonth[key] = {};
+    byMonth[key][date] = groups[date];
+  });
+
+  let html = '';
+  Object.keys(byMonth).forEach(monthKey => {
+    const dateGroups = byMonth[monthKey];
+    const monthCount = Object.values(dateGroups).reduce((s, arr) => s + arr.length, 0);
+
+    html += `<div class="month-group">
+      <div class="month-title">
+        ${monthKey} <span class="count">${monthCount}명</span>
+      </div>`;
+
+    Object.keys(dateGroups).sort().forEach(date => {
+      const persons = dateGroups[date];
+      html += `<div class="week-group">
+        <div class="week-title">${formatDateKor(date)} · ${persons.length}명</div>
+        <div class="person-cards">`;
+
+      persons.forEach((p, i) => {
+        html += `<div class="person-card">
+          ${miniAvatarHtml(p, i)}
+          <div>
+            <div class="person-name">${p.name}</div>
+            <div class="person-date">${p.displayDate}</div>
+          </div>
+        </div>`;
+      });
+
+      html += `</div></div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+applyFilters();
+</script>
+</body>
+</html>
