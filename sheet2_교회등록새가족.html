@@ -433,8 +433,9 @@ function applyFilters() {
   document.getElementById('count25').textContent = DATA.filter(d => d.year === '2025').length;
   document.getElementById('count26').textContent = DATA.filter(d => d.year === '2026').length;
 
-  if (currentView === 'table') renderTable(filtered);
-  else renderGroup(filtered);
+  const reversed = filtered.slice().reverse();
+  if (currentView === 'table') renderTable(reversed);
+  else renderGroup(reversed);
 }
 
 function renderTable(list) {
@@ -472,7 +473,7 @@ function renderGroup(list) {
 
   // 월별 그룹화
   const byMonth = {};
-  Object.keys(groups).sort().forEach(date => {
+  Object.keys(groups).sort().reverse().forEach(date => {
     const ym = date.substring(0,6);
     const y = date.substring(0,4);
     const m = date.substring(4,6);
@@ -491,7 +492,7 @@ function renderGroup(list) {
         ${monthKey} <span class="count">${monthCount}명</span>
       </div>`;
 
-    Object.keys(dateGroups).sort().forEach(date => {
+    Object.keys(dateGroups).sort().reverse().forEach(date => {
       const persons = dateGroups[date];
       html += `<div class="week-group">
         <div class="week-title">${formatDateKor(date)} · ${persons.length}명</div>

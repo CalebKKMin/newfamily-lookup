@@ -387,8 +387,9 @@ function applyFilters() {
     return true;
   });
 
-  if (currentView === 'card') renderCards(filtered);
-  else renderList(filtered);
+  const reversed = filtered.slice().reverse();
+  if (currentView === 'card') renderCards(reversed);
+  else renderList(reversed);
 
   document.getElementById('filteredCount').textContent = filtered.length;
   document.getElementById('totalCount').textContent = DATA.length;
