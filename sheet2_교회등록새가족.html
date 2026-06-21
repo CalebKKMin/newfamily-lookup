@@ -93,24 +93,25 @@
   }
 
   .person-cards {
-    display: flex; flex-wrap: wrap; gap: 10px;
+    display: flex; flex-wrap: wrap; gap: 12px;
   }
   .person-card {
     background: white; border-radius: 10px;
-    padding: 12px 16px; min-width: 130px;
+    width: 140px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    display: flex; align-items: center; gap: 10px;
+    overflow: hidden; display: flex; flex-direction: column;
     transition: transform 0.15s;
   }
-  .person-card:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  .person-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
   .mini-avatar {
-    width: 40px; height: 40px; border-radius: 50%;
+    width: 100%; aspect-ratio: 1 / 1;
     display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 0.95rem; font-weight: 700; flex-shrink: 0;
+    color: white; font-size: 2.4rem; font-weight: 700;
     background: linear-gradient(135deg, #0891b2, #0e7490);
     overflow: hidden;
   }
-  .mini-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .mini-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .person-info { padding: 8px 10px 10px; }
   .tbl-avatar {
     width: 36px; height: 36px; border-radius: 50%;
     display: inline-flex; align-items: center; justify-content: center;
@@ -509,7 +510,7 @@ function renderGroup(list) {
       persons.forEach((p, i) => {
         html += `<div class="person-card">
           ${miniAvatarHtml(p, i)}
-          <div>
+          <div class="person-info">
             <div class="person-name">${p.name}</div>
             <div class="person-date">${p.displayDate}</div>
           </div>

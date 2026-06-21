@@ -70,7 +70,7 @@
   /* ── 카드 뷰 ── */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
     gap: 16px; padding: 24px 32px;
   }
 
@@ -81,18 +81,19 @@
   }
   .card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
 
+  .card-photo {
+    width: 100%; aspect-ratio: 3 / 4;
+    overflow: hidden; background: #e2e8f0;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 3rem; font-weight: 700;
+  }
+  .card-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
   .card-header {
-    padding: 16px 20px 12px;
-    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px 10px;
+    display: flex; align-items: flex-start; justify-content: space-between;
     border-bottom: 1px solid #f0f4f8;
   }
-  .avatar {
-    width: 48px; height: 48px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 1.2rem; font-weight: 700; flex-shrink: 0;
-    overflow: hidden; background: #e2e8f0;
-  }
-  .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
   .card-title { flex: 1; }
   .card-name { font-size: 1.05rem; font-weight: 700; color: #2d3748; }
   .card-age { font-size: 0.82rem; color: #718096; margin-top: 2px; }
@@ -446,10 +447,14 @@ function renderCards(list) {
     const totalWeeks = weekDone.filter(Boolean).length;
     const isAssigned = d.group !== '미배정';
     const prog = ['#e2e8f0','#fbbf24','#34d399','#4f46e5'][totalWeeks];
+    const photo = PHOTOS[d.name.trim()];
+    const photoBlock = photo
+      ? `<div class="card-photo"><img src="${photo}" alt="${d.name}" onerror="this.parentElement.style.background='linear-gradient(135deg,${getAvatarColor(i)})';this.style.display='none';this.insertAdjacentText('afterend','${d.name.trim().charAt(0)}')"></div>`
+      : `<div class="card-photo" style="background:linear-gradient(135deg,${getAvatarColor(i)})">${d.name.trim().charAt(0)}</div>`;
     return `
     <div class="card">
+      ${photoBlock}
       <div class="card-header">
-        ${avatarHtml(d.name, i)}
         <div class="card-title">
           <div class="card-name">${d.name.trim()}</div>
           <div class="card-age">${d.age}년생 또래</div>
